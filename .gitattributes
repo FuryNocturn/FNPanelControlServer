@@ -1,0 +1,4 @@
+# This repo is consumed on Linux via `curl | bash`. Force LF line endings for
+# every text file so shell scripts never get CRLF (which breaks the shebang).
+* text=auto eol=lf
+*.sh text eol=lf
