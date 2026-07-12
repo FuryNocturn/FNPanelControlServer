@@ -463,8 +463,11 @@ perform_install() {
   fi
 
   # FNPanel: optionally install the Blueprint framework (themes/extensions).
+  # Never let a Blueprint failure abort the whole install: the "|| warning"
+  # also disables set -e inside install_blueprint, so an internal command
+  # failing there can't kill the panel/wings flow either.
   if [ "$INSTALL_BLUEPRINT" == true ] && fn_exists install_blueprint; then
-    install_blueprint
+    install_blueprint || warning "Blueprint install failed - panel is fine. Install/re-run Blueprint manually later (see https://blueprint.zip)."
   fi
 
   return 0
