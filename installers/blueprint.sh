@@ -23,16 +23,20 @@ command -v error   >/dev/null 2>&1 || error()   { echo -e "* ERROR: $1" 1>&2; }
 PANEL_DIR="${PANEL_DIR:-/var/www/pterodactyl}"
 
 _install_node_yarn() {
-  local node_major
-  node_major="$(node -v 2>/dev/null | sed 's/v\([0-9]*\).*/\1/')"
+  # Only probe "node -v" when node actually exists. Under set -e + pipefail a
+  # failing "node -v | sed" pipeline would otherwise abort the whole caller.
+  local node_major=0
+  if command -v node >/dev/null 2>&1; then
+    node_major="$(node -v | sed 's/v\([0-9]*\).*/\1/')"
+  fi
 
-  if ! command -v node >/dev/null 2>&1 || [ "${node_major:-0}" -lt 20 ]; then
-    output "Installing Node.js 20.x..."
+  if [ "${node_major:-0}" -lt 20 ]; then
+    output "Installing Node.js 22.x..."
     if command -v apt-get >/dev/null 2>&1; then
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
       apt-get install -y nodejs
     elif command -v dnf >/dev/null 2>&1; then
-      curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+      curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
       dnf install -y nodejs
     fi
   fi
@@ -59,7 +63,7 @@ install_blueprint() {
   # Resolve the latest Blueprint release zip from GitHub.
   local dl
   dl="$(curl -sSL https://api.github.com/repos/BlueprintFramework/framework/releases/latest \
-        | grep -Eo 'https://[^"]+release\.zip' | head -n1)"
+        | grep -Eo 'https://[^"]+release\.zip' | head -n1 || true)"
   if [ -z "$dl" ]; then
     error "Could not resolve the latest Blueprint release URL (GitHub rate limit?)."
     return 1
