@@ -2,3 +2,5 @@
 # every text file so shell scripts never get CRLF (which breaks the shebang).
 * text=auto eol=lf
 *.sh text eol=lf
+# Blueprint extension packages are gzip tarballs — keep them binary (no EOL munging).
+*.blueprint binary
