@@ -118,7 +118,11 @@ ask_timesync_client() {
   output "cross-server timestamp issues caused by drifting clocks)."
   echo -n "* Panel IP/host to sync time from (blank to skip): "
   read -r TIMESYNC_PANEL_HOST
-  [ -n "$TIMESYNC_PANEL_HOST" ] && CONFIGURE_TIMESYNC_CLIENT=true
+  # Use an if-block, NOT "[ -n ] && x": as the last statement of the function a
+  # bare "&&" returns non-zero when blank, which under `set -e` aborts the installer.
+  if [ -n "$TIMESYNC_PANEL_HOST" ]; then
+    CONFIGURE_TIMESYNC_CLIENT=true
+  fi
 }
 
 ####################
